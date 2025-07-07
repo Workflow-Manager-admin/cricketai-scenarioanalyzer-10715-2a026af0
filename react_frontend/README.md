@@ -11,6 +11,10 @@ This project provides a minimal React template with a clean, modern UI and minim
 
 ## Getting Started
 
+### API Connectivity (Development vs Production)
+- In **development**, frontend calls `/api/...` are proxied to FastAPI backend at `http://localhost:3001` via the `proxy` setting in `package.json`.  
+- In **production** or custom deployments, set the environment variable `REACT_APP_API_URL` (e.g., `https://my-cricket-backend.example.com`) to override the backend base URL.
+
 In the project directory, you can run:
 
 ### `npm start`

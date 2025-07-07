@@ -85,7 +85,9 @@ function App() {
     if (currentStep === 0) {
       setLiveLoading(true);
       setLiveError(null);
-      fetch('/api/live-match')
+      // Use REACT_APP_API_URL env or fallback to '' (proxy/hardcoded)
+      const API_URL = process.env.REACT_APP_API_URL || '';
+      fetch(`${API_URL}/api/live-match`)
         .then(async resp => {
           if (resp.ok) {
             const data = await resp.json();
@@ -125,8 +127,9 @@ function App() {
     setVisualData({ batsmen: [], bowlers: [] });
     // Call backend API for scenario generation based on live match
     try {
+      const API_URL = process.env.REACT_APP_API_URL || '';
       const resp = await fetch(
-        '/api/generate-scenario',
+        `${API_URL}/api/generate-scenario`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -136,7 +139,7 @@ function App() {
       const data = await resp.json();
       setScenario(data.scenario || "Unable to fetch scenario.");
       // Call backend API for question generation
-      const qresp = await fetch('/api/generate-question', {
+      const qresp = await fetch(`${API_URL}/api/generate-question`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenario: data.scenario })
@@ -159,8 +162,9 @@ function App() {
     // Call backend analysis API
     setLoadingAnalysis(true);
     try {
+      const API_URL = process.env.REACT_APP_API_URL || '';
       const resp = await fetch(
-        '/api/analyze-scenario',
+        `${API_URL}/api/analyze-scenario`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -175,7 +179,7 @@ function App() {
       // Optionally, request visualizations
       setLoadingVis(true);
       const vresp = await fetch(
-        '/api/visualizations?batsman=' + encodeURIComponent(matchDetails.batsman) + '&bowler=' + encodeURIComponent(matchDetails.bowler)
+        `${API_URL}/api/visualizations?batsman=` + encodeURIComponent(matchDetails.batsman) + '&bowler=' + encodeURIComponent(matchDetails.bowler)
       );
       const vdata = await vresp.json();
       setVisualData({
