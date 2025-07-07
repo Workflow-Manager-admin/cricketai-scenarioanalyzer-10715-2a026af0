@@ -46,11 +46,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   font-size: calc(10px + 2vmin);
   color: var(--text-primary);
   transition: background-color 0.3s ease;
   position: relative;
+  padding-bottom: 6vh;
 }
 
 .App-link {
@@ -84,16 +85,120 @@
   transform: translateY(0);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Multistep Navbar/Stepper */
+.stepper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-/* Responsive design for mobile */
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  color: var(--button-bg);
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 16px 0 0 0;
+  color: var(--button-bg);
+  letter-spacing: 0.2px;
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+}
+
+.match-form {
+  background: var(--bg-secondary);
+  border-radius: 13px;
+  padding: 30px 22px 24px 22px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.09);
+  margin-top: 25px;
+}
+
+.form-group {
+  margin-bottom: 17px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.form-group input:focus {
+  border: 1.5px solid var(--button-bg);
+}
+
+.btn {
+  background: var(--button-bg);
+  color: var(--button-text);
+  padding: 9px 20px;
+  border: none;
+  border-radius: 7px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  outline: none;
+  box-shadow: 0 2px 9px 0px rgba(0,0,0,0.03);
+  margin: 0 7px 0 0;
+}
+.btn:hover, .btn-large:hover {
+  filter: brightness(90%);
+  box-shadow: 0 4px 14px 0px rgba(0,0,0,0.08);
+}
+.btn:active {
+  filter: brightness(95%);
+}
+.btn-large {
+  font-size: 1.1rem;
+  padding: 13px 28px;
+  border-radius: 10px;
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.scenario-box {
+  background: var(--bg-primary);
+  border: 1.5px solid var(--button-bg);
+  border-radius: 12px;
+  padding: 20px 19px;
+  margin: 14px 0 5px 0;
+  color: var(--text-primary);
+  font-size: 1.09rem;
+  min-height: 42px;
+  text-align: left;
+  max-width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.analysis-box {
+  font-size: 1.03rem;
+  border-left: 4px solid var(--button-bg);
+}
+
+/* For extra minimal feel on mobile */
 @media (max-width: 768px) {
   .theme-toggle {
     top: 10px;
@@ -101,4 +206,40 @@
     padding: 8px 16px;
     font-size: 12px;
   }
+  .title {
+    font-size: 1.25rem;
+  }
+  .subtitle {
+    font-size: 1.04rem;
+  }
+  .match-form {
+    padding: 17px 8px;
+  }
+  .btn-large, .btn {
+    font-size: 0.92rem !important;
+    padding: 8px 13px !important;
+  }
+}
+
+/* Chart css (used in bar chart) */
+.bar-chart-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.bar-label {
+  min-width: 60px;
+  margin-right: 10px;
+  color: var(--text-primary);
+}
+.bar {
+  height: 18px;
+  background: linear-gradient(90deg, var(--text-secondary), var(--button-bg));
+  border-radius: 9px;
+  margin-right: 10px;
+}
+.bar-value {
+  color: var(--text-secondary);
+  min-width: 30px;
+  text-align: right;
 }
