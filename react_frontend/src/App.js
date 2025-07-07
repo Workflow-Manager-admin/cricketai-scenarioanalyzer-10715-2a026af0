@@ -36,9 +36,12 @@ const PerformanceBarChart = ({ data, label }) => {
   );
 };
 
-// Stepper
+/**
+ * Stepper: Each step in the app workflow.
+ * Step 1 now reads "Live Match Details" as it fetches from backend.
+ */
 const steps = [
-  "Enter Match Details",
+  "Live Match Details",
   "View AI Scenario",
   "Your Prediction",
   "AI Analysis",
@@ -50,10 +53,10 @@ function App() {
   const [theme, setTheme] = useState('light');
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Step 1: Match details state
-  const [matchDetails, setMatchDetails] = useState({
-    batsman: '', bowler: '', balls_remaining: '', runs_to_get: '', wickets_left: ''
-  });
+  // Step 1: Live match details state (fetched from backend)
+  const [matchDetails, setMatchDetails] = useState(null);
+  const [liveLoading, setLiveLoading] = useState(true);
+  const [liveError, setLiveError] = useState(null);
 
   // Step 2: Scenario
   const [scenario, setScenario] = useState('');
@@ -77,24 +80,50 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // Fetch live match details from backend on load (first step or reload)
+  useEffect(() => {
+    if (currentStep === 0) {
+      setLiveLoading(true);
+      setLiveError(null);
+      fetch('/api/live-match')
+        .then(async resp => {
+          if (resp.ok) {
+            const data = await resp.json();
+            setMatchDetails(data);
+            setLiveLoading(false);
+          } else {
+            setLiveError('Backend error: Could not fetch live match!');
+            setMatchDetails(null);
+            setLiveLoading(false);
+          }
+        })
+        .catch(err => {
+          setLiveError('Network error: Failed to get live match.');
+          setMatchDetails(null);
+          setLiveLoading(false);
+        });
+    }
+    // On leaving step 0, reset errors for next load.
+    if (currentStep !== 0) setLiveError(null);
+  }, [currentStep]);
+
   // Stepper logic
   const goNext = () => setCurrentStep(s => Math.min(s + 1, steps.length - 1));
   const goBack = () => setCurrentStep(s => Math.max(s - 1, 0));
 
-  // PUBLIC_INTERFACE: Handle match details input
-  const handleInputChange = (e) => {
-    setMatchDetails({ ...matchDetails, [e.target.name]: e.target.value });
-  };
+  // --- Manual input removed ---
 
-  // PUBLIC_INTERFACE: Submit match details and get scenario
+
+  // PUBLIC_INTERFACE: Submit match details and get scenario (for live match)
   const handleScenarioSubmit = async (e) => {
-    e.preventDefault();
+    e && e.preventDefault && e.preventDefault();
+    if (!matchDetails || liveLoading) return;
     setLoadingScenario(true);
     setScenario('');
     setQuestion('');
     setAnalysis('');
     setVisualData({ batsmen: [], bowlers: [] });
-    // Call backend API for scenario generation
+    // Call backend API for scenario generation based on live match
     try {
       const resp = await fetch(
         '/api/generate-scenario',
@@ -171,62 +200,90 @@ function App() {
     switch (currentStep) {
       case 0:
         return (
-          <form
-            className="match-form"
-            onSubmit={handleScenarioSubmit}
-            autoComplete="off"
-            style={{ maxWidth: 370, margin: "auto" }}>
-            <h2 className="title" style={{ color: "var(--button-bg)" }}>🏏 Enter Match Details</h2>
-            <div className="form-group">
-              <label>Batsman</label>
-              <input name="batsman" value={matchDetails.batsman} onChange={handleInputChange} required placeholder="e.g., Virat Kohli" />
-            </div>
-            <div className="form-group">
-              <label>Bowler</label>
-              <input name="bowler" value={matchDetails.bowler} onChange={handleInputChange} required placeholder="e.g., Jasprit Bumrah" />
-            </div>
-            <div className="form-group" style={{ display: "flex", gap: 10 }}>
-              <div style={{ flex: 1 }}>
-                <label>Balls Remaining</label>
-                <input
-                  name="balls_remaining"
-                  type="number"
-                  value={matchDetails.balls_remaining}
-                  onChange={handleInputChange}
-                  min={1}
-                  required
-                  placeholder="12" />
+          <div className="match-form" style={{ maxWidth: 370, margin: "auto" }}>
+            <h2 className="title" style={{ color: "var(--button-bg)" }}>🏏 Live Match Details</h2>
+            {liveLoading ? (
+              <div style={{ margin: "2rem 0", color: "var(--text-secondary)" }}>
+                Fetching live match details...
               </div>
-              <div style={{ flex: 1 }}>
-                <label>Runs To Get</label>
-                <input
-                  name="runs_to_get"
-                  type="number"
-                  value={matchDetails.runs_to_get}
-                  onChange={handleInputChange}
-                  min={1}
-                  required
-                  placeholder="25" />
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Wickets Left</label>
-              <input
-                name="wickets_left"
-                type="number"
-                value={matchDetails.wickets_left}
-                onChange={handleInputChange}
-                min={1}
-                required
-                placeholder="5" />
-            </div>
-            <button
-              className="btn btn-large"
-              type="submit"
-              disabled={loadingScenario}
-              style={{ width: "100%", marginTop: "1rem" }}
-            >{loadingScenario ? "Generating..." : "Generate Scenario"}</button>
-          </form>
+            ) : liveError ? (
+              <div style={{ color: "red", marginBottom: 12 }}>{liveError}</div>
+            ) : matchDetails ? (
+              <>
+                <div className="form-group">
+                  <label>Batsman</label>
+                  <div style={{
+                    padding: "10px 13px",
+                    background: "var(--bg-primary)",
+                    color: "var(--text-primary)",
+                    borderRadius: 7,
+                    border: "1px solid var(--border-color)"
+                  }}>
+                    {matchDetails.batsman}
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Bowler</label>
+                  <div style={{
+                    padding: "10px 13px",
+                    background: "var(--bg-primary)",
+                    color: "var(--text-primary)",
+                    borderRadius: 7,
+                    border: "1px solid var(--border-color)"
+                  }}>
+                    {matchDetails.bowler}
+                  </div>
+                </div>
+                <div className="form-group" style={{ display: "flex", gap: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label>Balls Remaining</label>
+                    <div style={{
+                      padding: "10px 13px",
+                      background: "var(--bg-primary)",
+                      color: "var(--text-primary)",
+                      borderRadius: 7,
+                      border: "1px solid var(--border-color)"
+                    }}>
+                      {matchDetails.balls_remaining}
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label>Runs To Get</label>
+                    <div style={{
+                      padding: "10px 13px",
+                      background: "var(--bg-primary)",
+                      color: "var(--text-primary)",
+                      borderRadius: 7,
+                      border: "1px solid var(--border-color)"
+                    }}>
+                      {matchDetails.runs_to_get}
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Wickets Left</label>
+                  <div style={{
+                    padding: "10px 13px",
+                    background: "var(--bg-primary)",
+                    color: "var(--text-primary)",
+                    borderRadius: 7,
+                    border: "1px solid var(--border-color)"
+                  }}>
+                    {matchDetails.wickets_left}
+                  </div>
+                </div>
+                <button
+                  className="btn btn-large"
+                  onClick={handleScenarioSubmit}
+                  type="button"
+                  disabled={loadingScenario || !matchDetails}
+                  style={{ width: "100%", marginTop: "1rem" }}
+                >{loadingScenario ? "Generating..." : "Generate Scenario"}</button>
+              </>
+            ) : (
+              <div>No live match data available.</div>
+            )}
+          </div>
         );
       case 1:
         return (
@@ -280,11 +337,11 @@ function App() {
               <div style={{ margin: "2rem 0" }}>Loading visual data...</div> :
               <>
                 <PerformanceBarChart
-                  data={visualData.batsmen.length ? visualData.batsmen : [{ name: matchDetails.batsman || 'Batsman', value: 0 }]}
+                  data={visualData.batsmen.length ? visualData.batsmen : [{ name: matchDetails?.batsman || 'Batsman', value: 0 }]}
                   label="Batsman Success Rate (%)"
                 />
                 <PerformanceBarChart
-                  data={visualData.bowlers.length ? visualData.bowlers : [{ name: matchDetails.bowler || 'Bowler', value: 0 }]}
+                  data={visualData.bowlers.length ? visualData.bowlers : [{ name: matchDetails?.bowler || 'Bowler', value: 0 }]}
                   label="Bowler Success Rate (%)"
                 />
               </>
