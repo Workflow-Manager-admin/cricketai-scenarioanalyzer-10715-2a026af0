@@ -1,0 +1,4 @@
+{
+    "command": "npm run test",
+    "working_directory": "/home/kavia/workspace/code-generation/cricketai-scenarioanalyzer-10715-2a026af0/react_frontend"
+}
